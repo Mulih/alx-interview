@@ -1,46 +1,46 @@
 #!/usr/bin/python3
-""" Log parsing """
+
+""" script that reads stdin line by line and computes metrics """
 
 import sys
-import re
 
 
-def output(log: dict) -> None:
-    """ Helper function to show statistics """
-    print("File size: {}".format(log["file_size"]))
-    for code in sorted(log["code_frequency"]):
-        if log["code_frequency"][code]:
-            print("{}: {}".format(code, log["code_frequency"][code]))
+def printStatus(dic, size):
+    """ Prints information """
+    print("File size: {:d}".format(size))
+    for i in sorted(dic.keys()):
+        if dic[i] != 0:
+            print("{}: {:d}".format(i, dic[i]))
 
 
-if __name__ == "__main__":
-    regex = re.compile(
-    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} - \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d+\] "GET /projects/260 HTTP/1.1" (.{3}) (\d+)') # nopep8
+# sourcery skip: use-contextlib-suppress
+statusCodes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0,
+               "404": 0, "405": 0, "500": 0}
 
-    line_count = 0
-    log = {}
-    log["file_size"] = 0
-    log["code_frequency"] = {
-        str(code): 0 for code in [
-            200, 301, 400, 401, 403, 404, 405, 500]}
+count = 0
+size = 0
 
-    try:
-        for line in sys.stdin:
-            line = line.strip()
-            match = regex.fullmatch(line)
-            if (match):
-                line_count += 1
-                code = match.group(1)
-                file_size = int(match.group(2))
+try:
+    for line in sys.stdin:
+        if count != 0 and count % 10 == 0:
+            printStatus(statusCodes, size)
 
-                # file size
-                log["file_size"] += file_size
+        stlist = line.split()
+        count += 1
 
-                # status code
-                if (code.isdecimal()):
-                    log["code_frequency"][code] += 1
+        try:
+            size += int(stlist[-1])
+        except Exception:
+            pass
 
-                if (line_count % 10 == 0):
-                    output(log)
-    except EOFError:
-        print("End of input reached.")
+        try:
+            if stlist[-2] in statusCodes:
+                statusCodes[stlist[-2]] += 1
+        except Exception:
+            pass
+    printStatus(statusCodes, size)
+
+
+except KeyboardInterrupt:
+    printStatus(statusCodes, size)
+    raise
