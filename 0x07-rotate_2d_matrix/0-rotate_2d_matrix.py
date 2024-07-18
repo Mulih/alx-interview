@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-"""Module for 2D matrix rotation"""
+'''Module for 2D matrix rotation'''
 
 
 def rotate_2d_matrix(matrix):
-    """Rotates m by n 2D matrix in place."""
+    '''Rotates m by n 2D matrix in place.'''
     if type(matrix) != list:
         return
     if len(matrix) <= 0:
