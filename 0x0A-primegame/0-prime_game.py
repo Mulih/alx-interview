@@ -44,6 +44,6 @@ def rm_multiples(lst, x):
     """removes multiples of x from lst"""
     for i in range(2, len(lst)):
         try:
-            lst[i * x] == 0:
+            lst[i * x] == 0
         except (ValueError, IndexError):
             break
